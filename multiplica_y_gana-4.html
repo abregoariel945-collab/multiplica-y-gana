@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multiplica y Gana</title>
+<style>
+:root{--ink:#20244a;--purple:#6957e8;--pink:#ff6b9a;--blue:#55c6f7;--green:#23b981;--paper:#fff}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family: "Trebuchet MS", Arial, sans-serif;color:var(--ink);background:linear-gradient(135deg,#e7f7ff 0%,#f4edff 50%,#fff0f5 100%);display:flex;align-items:center;justify-content:center;padding:24px;overflow-x:hidden}
+.blob{position:fixed;border-radius:50%;filter:blur(1px);opacity:.55;z-index:-1}.b1{width:210px;height:210px;background:#a9e8ff;top:-60px;left:-55px}.b2{width:260px;height:260px;background:#ffc2d7;right:-85px;bottom:-80px}
+.app{width:min(760px,100%);background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.8);border-radius:30px;padding:clamp(22px,5vw,42px);box-shadow:0 22px 60px #5143a51c;text-align:center}
+.brand{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:8px}.logo{width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,var(--purple),#9d6cff);color:white;display:grid;place-items:center;font-size:26px;box-shadow:0 8px 18px #6957e83d}
+h1{font-size:clamp(28px,5vw,42px);margin:0;letter-spacing:-1px}.subtitle{color:#777b9a;margin:8px 0 24px;font-size:16px}
+.screen{display:none}.screen.active{display:block}.start-form{display:flex;gap:10px;max-width:420px;margin:24px auto 0;flex-wrap:wrap;justify-content:center}.name-input{flex:1;min-width:180px;padding:14px 16px;border:2px solid #ecebfa;border-radius:14px;font-size:16px;color:var(--ink)}.leaderboard{width:100%;border-collapse:collapse;margin:18px 0}.leaderboard th,.leaderboard td{padding:11px 8px;border-bottom:1px solid #eeeafc;text-align:left}.leaderboard th{color:#777b9a;font-size:13px}.leaderboard td:last-child,.leaderboard th:last-child{text-align:right}.stats{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:25px}.stat{background:#f5f3ff;border-radius:14px;padding:10px 17px;font-size:14px;color:#6b6592}.stat strong{color:var(--purple);font-size:18px;margin-left:5px}
+.question-box{background:linear-gradient(135deg,#6b5ce7,#8e67ed);border-radius:24px;padding:27px 15px;color:white;box-shadow:0 12px 26px #6957e82b}
+.question-label{text-transform:uppercase;letter-spacing:2px;font-weight:700;font-size:12px;opacity:.85}.question{font-size:clamp(42px,8vw,64px);font-weight:900;margin:8px 0 0;letter-spacing:1px}
+.prompt{font-weight:700;margin:25px 0 14px;font-size:17px}
+.answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.answer{border:2px solid #ecebfa;background:#fff;border-radius:16px;padding:17px 12px;font-size:22px;font-weight:800;color:var(--ink);cursor:pointer;transition:transform .15s,border-color .15s,background .15s;box-shadow:0 4px 0 #ecebfa}
+.answer:hover:not(:disabled){transform:translateY(-3px);border-color:#a69af8;background:#faf9ff}
+.answer:focus-visible,.main-btn:focus-visible{outline:3px solid #24204d;outline-offset:3px}
+.answer:disabled{cursor:default}.answer.correct{border-color:var(--green);background:#e9fff5;color:#13855d;box-shadow:0 4px 0 #c5f2e1}.answer.wrong{border-color:#ff7190;background:#fff0f4;color:#c33d61;box-shadow:0 4px 0 #ffd5df}
+.feedback{min-height:28px;margin:18px 0 10px;font-weight:800;font-size:16px}.feedback.good{color:#15996d}.feedback.bad{color:#d94d70}
+.main-btn{border:0;border-radius:15px;background:var(--pink);color:white;padding:14px 26px;font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 6px 0 #e95183;transition:transform .15s;display:none}.main-btn:hover{transform:translateY(-2px)}.main-btn:active{transform:translateY(2px);box-shadow:0 3px 0 #e95183}
+.footer{margin-top:25px;color:#a0a0ba;font-size:12px}
+@media(max-width:420px){body{padding:12px}.app{padding:22px 16px;border-radius:23px}.answers{gap:9px}.answer{padding:15px 8px;font-size:20px}}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div>
+<main class="app">
+  <div class="brand"><div class="logo">×</div><h1>Multiplica y Gana</h1></div>
+  <p class="subtitle">¡Entrena tu mente y conviértete en una estrella de las matemáticas!</p>
+  <section class="screen active" id="startScreen">
+    <p class="subtitle">Escribe tu nombre y responde solo 10 multiplicaciones.</p>
+    <form class="start-form" id="startForm">
+      <input class="name-input" id="playerName" maxlength="20" placeholder="Tu nombre" aria-label="Tu nombre" required>
+      <button class="main-btn" style="display:inline-block" type="submit">¡Comenzar!</button>
+    </form>
+  </section>
+  <section class="screen" id="gameScreen">
+  <div class="stats">
+    <div class="stat">⭐ Puntos <strong id="score">0</strong></div>
+    <div class="stat">🔥 Racha <strong id="streak">0</strong></div>
+    <div class="stat">📝 Pregunta <strong id="number">1</strong></div>
+  </div>
+  <section class="question-box" aria-live="polite">
+    <div class="question-label">Resuelve la multiplicación</div>
+    <div class="question" id="question">7 × 8 = ?</div>
+  </section>
+  <p class="prompt">Elige la respuesta correcta 👇</p>
+  <div class="answers" id="answers">
+    <button class="answer">56</button><button class="answer">54</button><button class="answer">64</button><button class="answer">48</button>
+  </div>
+  <div class="feedback" id="feedback" aria-live="polite">¡Tú puedes! 💪</div>
+  <button class="main-btn" id="next">Siguiente pregunta →</button>
+  </section>
+  <section class="screen" id="endScreen">
+    <h2>🏆 ¡Juego terminado!</h2>
+    <p id="finalMessage">¡Buen trabajo!</p>
+    <h3>Tabla de clasificación</h3>
+    <table class="leaderboard"><thead><tr><th>#</th><th>Jugador</th><th>Puntos</th></tr></thead><tbody id="leaderboardBody"></tbody></table>
+    <button class="main-btn" id="playAgain" style="display:inline-block">Jugar otra vez</button>
+  </section>
+  <div class="footer">APRENDE · PRACTICA · DIVIÉRTETE</div>
+</main>
+<script>
+const questionEl=document.getElementById('question'), answersEl=document.getElementById('answers');
+const feedbackEl=document.getElementById('feedback'), nextBtn=document.getElementById('next');
+const scoreEl=document.getElementById('score'), streakEl=document.getElementById('streak'), numberEl=document.getElementById('number');
+const startScreen=document.getElementById('startScreen'), gameScreen=document.getElementById('gameScreen'), endScreen=document.getElementById('endScreen');
+let score=0, streak=0, number=1, correctAnswer=0, locked=false, player='', questionPool=[];
+const TOTAL_QUESTIONS=10;
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
+function makeQuestionPool(){const pool=[];for(let a=2;a<=12;a++){for(let b=a;b<=12;b++){pool.push([a,b])}}return shuffle(pool).slice(0,TOTAL_QUESTIONS)}
+function showScreen(screen){[startScreen,gameScreen,endScreen].forEach(el=>el.classList.remove('active'));screen.classList.add('active')}
+document.getElementById('startForm').addEventListener('submit',e=>{e.preventDefault();player=document.getElementById('playerName').value.trim();if(!player)return;score=0;streak=0;number=1;scoreEl.textContent='0';streakEl.textContent='0';questionPool=makeQuestionPool();showScreen(gameScreen);newQuestion()});
+function newQuestion(){
+  locked=false;nextBtn.style.display='none';feedbackEl.className='feedback';feedbackEl.textContent='¡Tú puedes! 💪';
+  if(questionPool.length===0){finishGame();return}
+  const [a,b]=questionPool.pop();correctAnswer=a*b;questionEl.textContent=`${a} × ${b} = ?`;
+  let options=new Set([correctAnswer]);while(options.size<4){let candidate=correctAnswer+(Math.floor(Math.random()*25)-12);if(candidate>0&&candidate!==correctAnswer)options.add(candidate)}
+  answersEl.innerHTML='';shuffle([...options]).forEach(value=>{const btn=document.createElement('button');btn.className='answer';btn.textContent=value;btn.addEventListener('click',()=>chooseAnswer(btn,value));answersEl.appendChild(btn)});numberEl.textContent=`${number}/${TOTAL_QUESTIONS}`;
+}
+function chooseAnswer(btn,value){if(locked)return;locked=true;const buttons=[...answersEl.querySelectorAll('button')];buttons.forEach(b=>b.disabled=true);
+  if(value===correctAnswer){btn.classList.add('correct');score+=10;streak++;feedbackEl.className='feedback good';feedbackEl.textContent='¡Correcto! 🎉 ¡Excelente trabajo!'}
+  else{btn.classList.add('wrong');streak=0;buttons.find(b=>Number(b.textContent)===correctAnswer).classList.add('correct');feedbackEl.className='feedback bad';feedbackEl.textContent=`¡Casi! La respuesta correcta era ${correctAnswer}.`}
+  scoreEl.textContent=score;streakEl.textContent=streak;nextBtn.style.display='inline-block';nextBtn.textContent=number===TOTAL_QUESTIONS?'Ver resultados →':'Siguiente pregunta →';
+}
+nextBtn.addEventListener('click',()=>{if(number>=TOTAL_QUESTIONS){finishGame()}else{number++;newQuestion()}});
+function finishGame(){
+  showScreen(endScreen);document.getElementById('finalMessage').textContent=`${player}, conseguiste ${score} de 100 puntos.`;
+  let ranking=[];try{ranking=JSON.parse(localStorage.getItem('multiplicaRanking')||'[]')}catch(e){ranking=[]}
+  ranking.push({name:player,score:score});ranking.sort((a,b)=>b.score-a.score);ranking=ranking.slice(0,10);
+  try{localStorage.setItem('multiplicaRanking',JSON.stringify(ranking))}catch(e){}
+  const body=document.getElementById('leaderboardBody');body.innerHTML='';ranking.forEach((item,i)=>{const tr=document.createElement('tr');const rank=document.createElement('td'),name=document.createElement('td'),points=document.createElement('td');rank.textContent=['🥇','🥈','🥉'][i]||String(i+1);name.textContent=item.name;points.textContent=item.score;tr.append(rank,name,points);body.appendChild(tr)});
+}
+document.getElementById('playAgain').addEventListener('click',()=>{document.getElementById('playerName').value=player;showScreen(startScreen)});
+</script>
+</body>
+</html>
